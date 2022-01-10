@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>Weather</title>
+
+    <meta charset="UTF-8" />
+    <link href="src/styles.css" />
+    <link
+      rel="stylesheet"
+      href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+      integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T"
+      crossorigin="anonymous"
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Abril+Fatface&family=Dongle&family=Lato:ital@1&family=Oswald:wght@500&display=swap"
+      rel="stylesheet"
+    />
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+  </head>
+  <style>
+    body {
+      font-family: Arial, Helvetica, sans-serif;
+      background-color: rgb(173, 194, 190) c2e;
+    }
+
+    h1 {
+      color: #d48c2e;
+      font-size: 26px;
+      font-weight: 100;
+      line-height: 28px;
+      margin: 0;
+    }
+
+    ul {
+      margin: 0 0 10px;
+      padding: 0;
+    }
+
+    li {
+      color: #d48c2e;
+      font-size: 18px;
+      font-weight: 100;
+      height: 19px;
+      line-height: 1;
+      list-style: none;
+    }
+
+    .weather-app {
+      border: 1px solid #7ceca7;
+      border-width: 5px;
+      padding: 20px;
+      margin: 20px auto;
+      border-radius: 12px;
+      max-width: 600px;
+    }
+
+    .temperature {
+      color: #a51279;
+      font-size: 64px;
+      font-weight: 400;
+      line-height: 1;
+    }
+
+    .unit {
+      color: #a51279;
+      position: relative;
+      top: -32px;
+    }
+    a {
+      text-decoration: none;
+    }
+
+    .search-form {
+      margin-bottom: 25px;
+    }
+  </style>
+  <body>
+    <div class="container">
+      <div class="weather-app">
+        <form class="search-form" id="search-bar">
+          <div class="row">
+            <div class="col-6">
+              <input
+                type="search"
+                placeholder="Enter city name"
+                autofocus="on"
+                autocomplete="off"
+                class="form-control shadow-sm"
+                id="search-box"
+              />
+            </div>
+            <div class="col-3">
+              <input
+                type="submit"
+                value="Search"
+                class="form-control btn btn-primary shadow-sm"
+              />
+            </div>
+          </div>
+        </form>
+        <h1 id="city-line">City</h1>
+        <ul>
+          <li id="date">Monday 2:51</li>
+          <li id="condition">Condition</li>
+        </ul>
+        <div class="row">
+          <div class="col-6">
+            <div class="clearfix">
+              <img
+                src="http://openweathermap.org/img/wn/10d@2x.png"
+                alt="clear"
+                id="icon"
+              />
+              <div class="float-left">
+                <span class="temperature" id="temp">-</span
+                ><span class="unit"
+                  ><a href="#" id="celsius-link">°C</a> |
+                  <a href="#" id="fahrenheit-link">°F</a></span
+                >
+              </div>
+            </div>
+          </div>
+          <div class="col-6">
+            <ul>
+              <li id="humidity">Humidity: -%</li>
+              <li id="wind-speed">Wind: - km/h</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+    <h2>
+      My
+      <a href="https://laughing-mahavira-c7ed32.netlify.app/">Netlify</a>
+    </h2>
+    <script src="src/index.js"></script>
+    <script>
+      function showResult(response) {
+        console.log(response);
+        document.querySelector("#city-line").innerHTML = response.data.name;
+
+        document.querySelector("#temp").innerHTML =
+          Math.round(celsiusTemperature);
+
+        document.querySelector(
+          "#humidity"
+        ).innerHTML = `Humidity: ${response.data.main.humidity}%`;
+
+        document.querySelector("#wind-speed").innerHTML = `Wind: ${Math.round(
+          response.data.wind.speed
+        )} km/h`;
+
+        document.querySelector("#condition").innerHTML =
+          response.data.weather[0].main;
+
+        document
+          .querySelector("#icon")
+          .setAttribute(
+            "src",
+            `http://openweathermap.org/img/wn/${response.data.weather[0].icon}@2x.png`
+          );
+
+        celsiusTemperature = response.data.main.temp;
+      }
+      function getLocation(event) {
+        event.preventDefault();
+        navigator.geolocation.getCurrentPosition(searchLocation);
+      }
+      function searchLocation(position) {
+        let latitude = position.coords.latitude;
+        let longitude = position.coords.longitude;
+        let apiKey = "1e8ad1aad91c9b6b453cdc5d15d3036d";
+        let apiUrlAtLocation = `https://api.openweathermap.org/data/2.5/weather?lat=${latitude}&lon=${longitude}&APPID=${apiKey}&units=metric`;
+        axios.get(apiUrlAtLocation).then(showResult);
+      }
+
+      function searchCity(cityInput) {
+        let apiKey = "1e8ad1aad91c9b6b453cdc5d15d3036d";
+        let apiUrl = `https://api.openweathermap.org/data/2.5/weather?q=${cityInput}&APPID=${apiKey}&units=metric`;
+        axios.get(apiUrl).then(showResult);
+      }
+
+      function clickSearch(event) {
+        event.preventDefault();
+        let city = document.querySelector("#search-box").value;
+        searchCity(city);
+      }
+      let cityInput = document.querySelector("#search-bar");
+      cityInput.addEventListener("submit", clickSearch);
+
+      function displayFahrenheitTemperature(event) {
+        event.preventDefault();
+        let temperatureElement = document.querySelector("#temp");
+        let fahrenheitTemperature = (celsiusTemperature * 9) / 5 + 32;
+        temperatureElement.innerHTML = Math.round(fahrenheitTemperature);
+      }
+      function displayCelsiusTemperature(event) {
+        event.preventDefault();
+        let temperatureElement = document.querySelector("#temp");
+
+        temperatureElement.innerHTML = Math.round(celsiusTemperature);
+      }
+
+      searchCity("Tehran");
+
+      let celsiusTemperature = null;
+
+      let fahrenheitLink = document.querySelector("#fahrenheit-link");
+      fahrenheitLink.addEventListener("click", displayFahrenheitTemperature);
+      let celsiusLink = document.querySelector("#celsius-link");
+      celsiusLink.addEventListener("click", displayCelsiusTemperature);
+    </script>
+  </body>
+</html>
